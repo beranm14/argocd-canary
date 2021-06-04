@@ -33,5 +33,5 @@ spec:
             host: demo
           weight: 100
         - destination:
-            host: demo-canary
+            host: demo-preview
           weight: 0
