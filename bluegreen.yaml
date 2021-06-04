@@ -1,4 +1,3 @@
----
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -46,50 +45,3 @@ spec:
       # stack as soon as the ReplicaSet are completely ready/available.
       # Rollouts can be resumed using: `kubectl argo rollouts promote ROLLOUT`
       autoPromotionEnabled: true
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: demo
-spec:
-  ports:
-  - port: 80
-    targetPort: 8080
-  selector:
-    app: demo
-  type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: demo-preview
-spec:
-  ports:
-  - port: 80
-    targetPort: 8080
-  selector:
-    app: demo
-  type: ClusterIP
----
-apiVersion: argoproj.io/v1alpha1
-kind: AnalysisTemplate
-metadata:
-  name: success-rate
-spec:
-  args:
-  - name: service-name
-  metrics:
-  - name: success-rate
-    successCondition: result[0] >= 0.95
-    interval: 30s
-    failureLimit: 1
-    provider:
-      prometheus:
-        address: http://prometheus.istio-system.svc.cluster.local:9090
-        query: |
-          sum(irate(
-            istio_requests_total{reporter="source",destination_service=~"{{args.service-name}}",response_code!~"5.*"}[1m]
-          )) / 
-          sum(irate(
-            istio_requests_total{reporter="source",destination_service=~"{{args.service-name}}"}[1m]
-          ))
